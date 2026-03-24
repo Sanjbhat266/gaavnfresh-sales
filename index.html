@@ -456,6 +456,10 @@ if (isPlaceholder) {
     <div class="field"><label>Phone</label><input id="nc-phone" type="tel" placeholder="Mobile number"></div>
     <div class="field"><label>Address</label><textarea id="nc-address" placeholder="Delivery address"></textarea></div>
     <div class="field"><label>Area / Route</label><input id="nc-area" placeholder="e.g. Hadapsar, Kothrud..."></div>
+    <div class="field">
+      <label>Opening Balance (Rs) <span style="font-size:10px;color:var(--red);font-weight:400;">— Amount customer owes as on today</span></label>
+      <input id="nc-opening-bal" type="number" placeholder="0.00" step="0.01" min="0">
+    </div>
     <div class="section-label">Product Pricing (leave blank for standard)</div>
     <div id="nc-pricing-fields"></div>
     <div class="btn-row">
@@ -1160,6 +1164,14 @@ function openCustomerDetail(id) {
   if(!c) return;
   const modal = document.getElementById('modal-order');
   document.getElementById('modal-order-title').textContent = c.name;
+  const openBal = c.openingBalance || c.balance || 0;
+  const openBalNote = openBal > 0
+    ? `<div style="background:#FFEBEE;border-radius:10px;padding:8px 14px;margin-bottom:8px;font-size:12px;color:var(--red);">
+        📋 Opening balance as on ${c.openingBalanceDate||'24/03/2026'}: <b>₹${openBal.toLocaleString('en-IN',{minimumFractionDigits:2})}</b> (Dr — customer owes you)</div>`
+    : (openBal < 0
+      ? `<div style="background:#E8F5E9;border-radius:10px;padding:8px 14px;margin-bottom:8px;font-size:12px;color:var(--green);">
+        📋 Opening balance: <b>₹${Math.abs(openBal).toLocaleString('en-IN',{minimumFractionDigits:2})}</b> Cr</div>`
+      : '');
   const priceRows = PRODUCTS.map(p => {
     const rate = c.pricing?.[p.id] || p.stdRate;
     const isCustom = c.pricing?.[p.id] && c.pricing[p.id] !== p.stdRate;
@@ -1172,7 +1184,8 @@ function openCustomerDetail(id) {
   document.getElementById('modal-order-content').innerHTML = `
     <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">📞 ${c.phone||'—'}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">📍 ${c.address||c.area||'—'}</div>
-    ${(c.balance||0)>0?`<div style="background:#FFEBEE;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:700;">💰 Outstanding: ₹${c.balance.toLocaleString('en-IN')}</div>`:''}
+    ${openBalNote}
+    ${(c.balance||0)>0?`<div style="background:#FFEBEE;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:700;">💰 Current Outstanding: ₹${c.balance.toLocaleString('en-IN')}</div>`:''}
     <div class="section-label">Pricing (★ = custom rate)</div>
     ${priceRows}
     ${STATE.role==='owner'?`<button class="btn btn-primary" style="margin-top:12px;" onclick="closeModal('modal-order')">Close</button>`:''}`;
@@ -1243,12 +1256,16 @@ async function saveNewCustomer() {
     const v = parseFloat(document.getElementById('ncp-'+p.id)?.value);
     if(!isNaN(v) && v>0) pricing[p.id] = v;
   });
+  const openingBal = parseFloat(document.getElementById('nc-opening-bal')?.value) || 0;
   const customer = {
     name,
     phone: document.getElementById('nc-phone').value.trim(),
     address: document.getElementById('nc-address').value.trim(),
     area: document.getElementById('nc-area').value.trim(),
-    pricing, balance: 0,
+    pricing,
+    balance: openingBal,
+    openingBalance: openingBal,
+    openingBalanceDate: '24/03/2026',
     createdAt: Date.now(),
   };
 
@@ -1286,12 +1303,17 @@ async function uploadCustomers(input) {
         const val = parseFloat(row[colKey]||row[colKey.toLowerCase()]||0);
         if(val > 0) pricing[p.id] = val;
       });
+      const openBal = parseFloat(row['Opening_Balance']||row['opening_balance']||0)||0;
       const customer = {
         name: String(name),
         phone: String(row['Phone']||row['phone']||''),
         address: String(row['Address']||row['address']||''),
         area: String(row['Area']||row['area']||''),
-        pricing, balance: 0, createdAt: Date.now(),
+        pricing,
+        balance: openBal,
+        openingBalance: openBal,
+        openingBalanceDate: '24/03/2026',
+        createdAt: Date.now(),
       };
       if(window.dbReady) {
         const {addDoc,collection} = window.fsOps;
