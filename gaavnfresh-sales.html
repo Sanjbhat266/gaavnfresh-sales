@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Gaavn Fresh — Sales</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FEFAF3;
+  --ink: #1C1810;
+  --amber: #C8830A;
+  --amber2: #E09B1A;
+  --green: #2A7A45;
+  --red: #C0392B;
+  --blue: #1A527A;
+  --surface: #FFFFFF;
+  --border: #E8DFC8;
+  --muted: #8A7A60;
+  --card: #FFFDF8;
+  --shadow: 0 2px 12px rgba(28,24,16,0.08);
+  --radius: 14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;font-size:14px;}
+h1,h2,h3,.serif{font-family:'DM Serif Display',serif;}
+
+/* ── ROLE SELECT SCREEN ── */
+#role-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:var(--cream);}
+.role-logo{font-family:'DM Serif Display',serif;font-size:32px;color:var(--amber);margin-bottom:4px;}
+.role-sub{font-size:12px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:40px;}
+.role-cards{display:grid;grid-template-columns:1fr;gap:14px;width:100%;max-width:380px;}
+.role-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:20px 24px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:16px;}
+.role-card:active,.role-card:hover{border-color:var(--amber);background:#FFFBF0;transform:translateY(-1px);box-shadow:var(--shadow);}
+.role-icon{font-size:28px;width:44px;text-align:center;}
+.role-info h3{font-size:16px;font-weight:600;margin-bottom:2px;}
+.role-info p{font-size:12px;color:var(--muted);}
+
+/* ── MAIN APP ── */
+#app{display:none;max-width:480px;margin:0 auto;padding-bottom:80px;}
+.top-bar{background:var(--surface);border-bottom:1.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.top-bar-left{display:flex;align-items:center;gap:10px;}
+.top-bar .logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--amber);}
+.top-bar .role-badge{background:var(--amber);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;}
+.role-badge.delivery{background:var(--blue);}
+.role-badge.owner{background:var(--green);}
+.top-bar .date-chip{font-size:11px;color:var(--muted);font-weight:500;}
+.notif-btn{position:relative;background:none;border:none;font-size:20px;cursor:pointer;padding:4px;}
+.notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;background:var(--red);border-radius:50%;display:none;}
+.notif-dot.show{display:block;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--surface);border-top:1.5px solid var(--border);display:flex;z-index:100;}
+.nav-btn{flex:1;padding:10px 4px 8px;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:'DM Sans',sans-serif;font-size:10px;color:var(--muted);font-weight:500;transition:color 0.15s;}
+.nav-btn.active{color:var(--amber);}
+.nav-btn .nav-icon{font-size:20px;}
+
+/* ── SCREENS ── */
+.screen{display:none;padding:16px;}
+.screen.active{display:block;}
+.page-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);margin-bottom:4px;}
+.page-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.card-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.card-head h3{font-size:14px;font-weight:600;}
+.card-body{padding:14px 16px;}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.stat-box{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 10px;text-align:center;}
+.stat-num{font-family:'DM Serif Display',serif;font-size:22px;color:var(--amber);}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:500;margin-top:2px;}
+
+/* ── ORDER CARDS ── */
+.order-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden;}
+.order-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.order-id{font-size:11px;color:var(--muted);font-weight:600;font-family:monospace;}
+.order-customer{font-size:14px;font-weight:600;margin-top:2px;}
+.order-amount{font-family:'DM Serif Display',serif;font-size:18px;color:var(--amber);}
+.status-pill{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.3px;}
+.status-confirmed{background:#E8F5E9;color:#2A7A45;}
+.status-modified{background:#FFF3E0;color:#E65100;}
+.status-delivered{background:#E3F2FD;color:#1565C0;}
+.status-paid{background:#E8F5E9;color:#2A7A45;}
+.status-due{background:#FFEBEE;color:#C62828;}
+.status-draft{background:#F5F5F5;color:#616161;}
+.status-partial{background:#FFF8E1;color:#F57F17;}
+.order-body{padding:0 14px 14px;border-top:1px solid var(--border);display:none;}
+.order-body.open{display:block;}
+.order-items{margin:10px 0;}
+.order-item-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.order-item-row:last-child{border-bottom:none;}
+.item-name{font-size:13px;font-weight:500;}
+.item-detail{font-size:11px;color:var(--muted);}
+.item-amt{font-size:13px;font-weight:600;color:var(--ink);}
+
+/* ── FORMS ── */
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color 0.15s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--amber);}
+.field textarea{resize:vertical;min-height:60px;}
+
+/* ── PRODUCT SELECTOR ── */
+.product-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+.prod-item{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;transition:all 0.15s;}
+.prod-item.selected{border-color:var(--amber);background:#FFFBF0;}
+.prod-item-name{font-size:12px;font-weight:600;margin-bottom:4px;}
+.prod-item-price{font-size:11px;color:var(--muted);}
+.prod-qty-row{display:flex;align-items:center;gap:8px;margin-top:8px;}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.qty-btn:active{background:var(--amber);color:#fff;border-color:var(--amber);}
+.qty-display{font-size:16px;font-weight:700;min-width:28px;text-align:center;}
+
+/* ── BUTTONS ── */
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:center;}
+.btn-primary{background:var(--amber);color:#fff;}
+.btn-primary:active{background:var(--amber2);}
+.btn-secondary{background:var(--surface);color:var(--ink);border:1.5px solid var(--border);}
+.btn-success{background:var(--green);color:#fff;}
+.btn-danger{background:var(--red);color:#fff;}
+.btn-blue{background:var(--blue);color:#fff;}
+.btn-sm{padding:8px 14px;font-size:12px;width:auto;display:inline-block;border-radius:8px;}
+.btn-row{display:flex;gap:8px;margin-top:12px;}
+.btn-row .btn{flex:1;}
+
+/* ── SEARCH ── */
+.search-box{position:relative;margin-bottom:16px;}
+.search-box input{padding-left:36px;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;}
+
+/* ── CUSTOMER LIST ── */
+.customer-row{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.customer-row:active{background:#FFFBF0;border-color:var(--amber);}
+.cust-name{font-size:14px;font-weight:600;}
+.cust-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.cust-balance{font-size:13px;font-weight:700;}
+.cust-balance.owed{color:var(--red);}
+.cust-balance.clear{color:var(--green);}
+
+/* ── PAYMENT MODES ── */
+.pay-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0;}
+.pay-mode-btn{padding:10px 6px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
+.pay-mode-btn.selected{border-color:var(--amber);background:#FFFBF0;color:var(--amber);}
+.pay-mode-icon{font-size:18px;display:block;margin-bottom:4px;}
+
+/* ── APPROVAL BADGE ── */
+.approval-needed{background:#FFF3E0;border:1.5px solid #FFB300;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.approval-needed p{font-size:12px;font-weight:600;color:#E65100;}
+
+/* ── DUE TABLE ── */
+.due-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.due-row:last-child{border-bottom:none;}
+.due-days{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.due-days.overdue{background:#FFEBEE;color:var(--red);}
+.due-days.ok{background:#E8F5E9;color:var(--green);}
+
+/* ── UPLOAD AREA ── */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.upload-zone:hover{border-color:var(--amber);background:#FFFBF0;}
+.upload-zone p{font-size:13px;color:var(--muted);margin-top:8px;}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+.empty-icon{font-size:40px;margin-bottom:12px;}
+.empty-state p{font-size:14px;}
+
+/* ── DIVIDER ── */
+.divider{border-top:1px solid var(--border);margin:12px 0;}
+.section-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:16px 0 8px;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1C1810;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all 0.3s;z-index:999;white-space:nowrap;pointer-events:none;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,24,16,0.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;}
+
+/* ── FIREBASE CONFIG NOTICE ── */
+.config-notice{background:#FFF8E1;border:1.5px solid #FFB300;border-radius:12px;padding:14px;margin-bottom:16px;font-size:12px;}
+.config-notice strong{color:#E65100;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- FIREBASE CONFIG — paste your config here           -->
+<!-- ══════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc, onSnapshot, query, where, orderBy, Timestamp, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+// ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyAI8NvjxdcmoG2UinhJ0LZ0EdL18b-foZ0",
+  authDomain: "gaavnfresh-sales.firebaseapp.com",
+  projectId: "gaavnfresh-sales",
+  storageBucket: "gaavnfresh-sales.firebasestorage.app",
+  messagingSenderId: "974451495449",
+  appId: "1:974451495449:web:3985b05c49e52b5fbad088"
+};
+// ─────────────────────────────────────────────────────
+
+let app, db;
+const isPlaceholder = firebaseConfig.apiKey.startsWith('PASTE_') || firebaseConfig.apiKey === '';
+if (isPlaceholder) {
+  window.dbReady = false;
+  console.warn('Firebase config not set — running in demo mode');
+} else {
+  try {
+    app = initializeApp(firebaseConfig);
+    db  = getFirestore(app);
+    window.db = db;
+    window.fsOps = { collection, doc, addDoc, setDoc, getDoc, getDocs, updateDoc,
+      onSnapshot, query, where, orderBy, Timestamp, serverTimestamp };
+    window.dbReady = true;
+  } catch(e) {
+    window.dbReady = false;
+    console.warn('Firebase init failed:', e.message);
+  }
+}
+</script>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- ROLE SELECT                                        -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="role-screen">
+  <div class="role-logo">🐄 Gaavn Fresh</div>
+  <div class="role-sub">Sales Order System</div>
+  <div class="role-cards">
+    <div class="role-card" onclick="selectRole('owner')">
+      <div class="role-icon">👑</div>
+      <div class="role-info"><h3>Owner</h3><p>Full access — orders, reports, customers</p></div>
+    </div>
+    <div class="role-card" onclick="selectRole('sales')">
+      <div class="role-icon">📋</div>
+      <div class="role-info"><h3>Sales Person</h3><p>Create orders, approve modifications</p></div>
+    </div>
+    <div class="role-card" onclick="selectRole('delivery')">
+      <div class="role-icon">🚚</div>
+      <div class="role-info"><h3>Delivery Person</h3><p>Update deliveries, collect payments</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MAIN APP                                           -->
+<!-- ══════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="logo">🐄 GF</span>
+      <span class="role-badge" id="role-badge">SALES</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="date-chip" id="today-chip"></span>
+      <button class="notif-btn" onclick="showScreen('approvals')" title="Pending Approvals">
+        🔔<span class="notif-dot" id="notif-dot"></span>
+      </button>
+      <button onclick="switchRole()" style="background:none;border:1px solid var(--border);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;color:var(--muted);">⇄ Role</button>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: DASHBOARD ── -->
+  <div class="screen active" id="screen-home">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title" id="dash-greeting">Good morning</div>
+      <div class="page-sub" id="dash-date">Today's overview</div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="stat-orders">0</div><div class="stat-lbl">Orders</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-revenue">₹0</div><div class="stat-lbl">Revenue</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-pending">0</div><div class="stat-lbl">Pending</div></div>
+      </div>
+
+      <!-- Pending approvals alert -->
+      <div id="approval-alert" class="approval-needed" style="display:none;" onclick="showScreen('approvals')">
+        <span style="font-size:20px;">⚠️</span>
+        <p id="approval-alert-text">modifications need your approval</p>
+      </div>
+
+      <!-- Today's orders -->
+      <!-- Quick action for sales role -->
+      <div id="home-quick-actions" style="display:none;margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="showScreen('new-order')">➕ New Order</button>
+      </div>
+
+      <div class="section-label">Today's Orders</div>
+      <div id="home-orders-list">
+        <div class="empty-state"><div class="empty-icon">📋</div><p>No orders yet today</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: NEW ORDER ── -->
+  <div class="screen" id="screen-new-order">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title">New Order</div>
+      <div class="page-sub">Select customer and products</div>
+
+      <!-- Step 1: Customer -->
+      <div id="step-customer">
+        <div class="section-label">Search Customer</div>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="cust-search" placeholder="Name or area..." oninput="searchCustomers(this.value)">
+        </div>
+        <div id="cust-results"></div>
+      </div>
+
+      <!-- Step 2: Products (shown after customer selected) -->
+      <div id="step-products" style="display:none;">
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:13px;font-weight:700;" id="selected-cust-name">—</div>
+            <div style="font-size:11px;color:var(--muted);" id="selected-cust-area">—</div>
+          </div>
+          <button onclick="clearCustomer()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;">✕ Change</button>
+        </div>
+
+        <div class="section-label">Select Products</div>
+        <div id="product-list"></div>
+
+        <div class="section-label">Order Summary</div>
+        <div id="order-summary-items" style="margin-bottom:12px;"></div>
+        <div style="display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid var(--border);margin-bottom:16px;">
+          <span style="font-weight:700;">Total</span>
+          <span style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--amber);" id="order-total">₹0</span>
+        </div>
+
+        <div class="field">
+          <label>Delivery Notes (optional)</label>
+          <textarea id="order-notes" placeholder="Special instructions..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitOrder()">Submit Order →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: MY ORDERS / ALL ORDERS ── -->
+  <div class="screen" id="screen-orders">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title" id="orders-screen-title">Orders</div>
+      <div class="page-sub">Tap an order to expand</div>
+
+      <!-- Filter row -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;">
+        <button class="filter-btn active" onclick="filterOrders('all',this)">All</button>
+        <button class="filter-btn" onclick="filterOrders('confirmed',this)">Confirmed</button>
+        <button class="filter-btn" onclick="filterOrders('modified',this)">Modified ⚠</button>
+        <button class="filter-btn" onclick="filterOrders('delivered',this)">Delivered</button>
+        <button class="filter-btn" onclick="filterOrders('due',this)">Due 💰</button>
+      </div>
+      <style>.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;} .filter-btn.active{background:var(--amber);color:#fff;border-color:var(--amber);}</style>
+
+      <div id="orders-list"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: APPROVALS ── -->
+  <div class="screen" id="screen-approvals">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title">Pending Approvals</div>
+      <div class="page-sub">Orders modified by delivery person</div>
+      <div id="approvals-list">
+        <div class="empty-state"><div class="empty-icon">✅</div><p>No pending approvals</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: CUSTOMERS ── -->
+  <div class="screen" id="screen-customers">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title">Customers</div>
+      <div class="page-sub">Balances and order history</div>
+
+      <div id="owner-upload-section" style="display:none;">
+        <div class="config-notice">
+          <strong>Upload customers via Excel</strong><br>
+          Columns: Name, Phone, Address, Area, LP_Rate, MFP_Rate, LFP_Rate, MP_Rate, Ghee_Rate, LC_Rate, FC_Rate, Chaach_Rate, SL_Rate, ML_Rate, CMK_Rate, STK_Rate
+        </div>
+        <div class="upload-zone" onclick="document.getElementById('excel-upload').click()">
+          <div style="font-size:32px;">📊</div>
+          <p>Tap to upload customer Excel (.xlsx)</p>
+          <p style="font-size:11px;margin-top:4px;">or drag and drop</p>
+        </div>
+        <input type="file" id="excel-upload" accept=".xlsx,.csv" style="display:none;" onchange="uploadCustomers(this)">
+        <div style="margin-top:10px;">
+          <button class="btn btn-secondary btn-sm" onclick="downloadTemplate()">📥 Download Template</button>
+        </div>
+      </div>
+
+      <!-- Add customer button — shown for owner and sales -->
+      <div id="add-cust-btn-wrap" style="display:none;margin-top:12px;margin-bottom:8px;">
+        <button class="btn btn-primary" onclick="showAddCustomer()" style="width:100%;">+ Add Customer</button>
+      </div>
+
+      <div class="search-box" style="margin-top:8px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="cust-list-search" placeholder="Search customers..." oninput="renderCustomerList(this.value)">
+      </div>
+
+      <div id="customer-list-container"></div>
+    </div>
+  </div>
+
+  <!-- ── SCREEN: DUES ── -->
+  <div class="screen" id="screen-dues">
+    <div style="padding:16px 16px 0;">
+      <div class="page-title">Payment Dues</div>
+      <div class="page-sub">Outstanding invoices by customer</div>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="due-count">0</div><div class="stat-lbl">Invoices Due</div></div>
+        <div class="stat-box"><div class="stat-num" id="due-amount" style="font-size:16px;">₹0</div><div class="stat-lbl">Total Due</div></div>
+        <div class="stat-box"><div class="stat-num" id="due-overdue">0</div><div class="stat-lbl">Overdue 7d+</div></div>
+      </div>
+
+      <div id="dues-list"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav" id="bottom-nav"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- MODALS                                             -->
+<!-- ══════════════════════════════════════════════════ -->
+
+<!-- Order Detail Modal -->
+<div class="modal-overlay" id="modal-order">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-order-title">Order Details</div>
+    <div id="modal-order-content"></div>
+  </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="modal-add-customer">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Add Customer</div>
+    <div class="field"><label>Name</label><input id="nc-name" placeholder="Customer name"></div>
+    <div class="field"><label>Phone</label><input id="nc-phone" type="tel" placeholder="Mobile number"></div>
+    <div class="field"><label>Address</label><textarea id="nc-address" placeholder="Delivery address"></textarea></div>
+    <div class="field"><label>Area / Route</label><input id="nc-area" placeholder="e.g. Hadapsar, Kothrud..."></div>
+    <div class="section-label">Product Pricing (leave blank for standard)</div>
+    <div id="nc-pricing-fields"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-customer')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                         -->
+<!-- ══════════════════════════════════════════════════ -->
+<script>
+// ── PRODUCT CATALOGUE ─────────────────────────────────────────────
+const PRODUCTS = [
+  {id:'lp',   name:'Lite Paneer',    unit:'kg',   stdRate:280, emoji:'🧀'},
+  {id:'mfp',  name:'Med Fat Paneer', unit:'kg',   stdRate:300, emoji:'🧀'},
+  {id:'lfp',  name:'Low Fat Paneer', unit:'kg',   stdRate:260, emoji:'🧀'},
+  {id:'mp',   name:'Malai Paneer',   unit:'pack', stdRate:350, emoji:'🧀'},
+  {id:'ghee', name:'Ghee',           unit:'kg',   stdRate:650, emoji:'🫙'},
+  {id:'lc',   name:'Lite Curd',      unit:'kg',   stdRate:60,  emoji:'🥛'},
+  {id:'fc',   name:'Fresh Curd',     unit:'kg',   stdRate:55,  emoji:'🥛'},
+  {id:'ch',   name:'Chaach',         unit:'L',    stdRate:40,  emoji:'🧉'},
+  {id:'sl',   name:'Sweet Lassi',    unit:'cup',  stdRate:100, emoji:'🥤'},
+  {id:'ml',   name:'Mango Lassi',    unit:'cup',  stdRate:100, emoji:'🥭'},
+  {id:'cmk',  name:'CM Khoya',       unit:'kg',   stdRate:240, emoji:'🍫'},
+  {id:'stk',  name:'Std Khoya',      unit:'kg',   stdRate:237, emoji:'🍫'},
+];
+
+// ── APP STATE ──────────────────────────────────────────────────────
+let STATE = {
+  role: null,
+  customers: [],
+  orders: [],
+  selectedCustomer: null,
+  cart: {},          // {productId: {qty, rate}}
+  ordersUnsubscribe: null,
+  pendingApprovals: 0,
+};
+
+const TODAY = new Date();
+const TODAY_STR = TODAY.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+const TODAY_KEY = `${TODAY.getFullYear()}-${String(TODAY.getMonth()+1).padStart(2,'0')}-${String(TODAY.getDate()).padStart(2,'0')}`;
+
+// ── ROLE SELECTION ─────────────────────────────────────────────────
+function selectRole(role) {
+  STATE.role = role;
+  document.getElementById('role-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const badge = document.getElementById('role-badge');
+  badge.textContent = role.toUpperCase();
+  badge.className = 'role-badge' + (role==='delivery'?' delivery':role==='owner'?' owner':'');
+  document.getElementById('today-chip').textContent = TODAY_STR;
+
+  // Set greeting
+  const h = TODAY.getHours();
+  document.getElementById('dash-greeting').textContent =
+    h<12 ? 'Good morning 🌅' : h<17 ? 'Good afternoon ☀️' : 'Good evening 🌙';
+
+  buildNav(role);
+  // Show quick action button only for sales
+  setTimeout(() => {
+    const qa = document.getElementById('home-quick-actions');
+    if(qa) qa.style.display = role==='sales' ? 'block' : 'none';
+  }, 100);
+  initApp();
+}
+
+function switchRole() {
+  if(STATE.ordersUnsubscribe) STATE.ordersUnsubscribe();
+  STATE = {role:null,customers:[],orders:[],selectedCustomer:null,cart:{},ordersUnsubscribe:null,pendingApprovals:0};
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('role-screen').style.display = 'flex';
+}
+
+// ── NAVIGATION ─────────────────────────────────────────────────────
+const NAV_CONFIG = {
+  owner:    [{id:'home',icon:'🏠',label:'Home'},{id:'orders',icon:'📋',label:'Orders'},{id:'customers',icon:'👥',label:'Customers'},{id:'dues',icon:'💰',label:'Dues'}],
+  sales:    [{id:'home',icon:'🏠',label:'Home'},{id:'new-order',icon:'➕',label:'New Order'},{id:'orders',icon:'📋',label:'My Orders'},{id:'customers',icon:'👥',label:'Customers'},{id:'dues',icon:'💰',label:'Dues'}],
+  delivery: [{id:'home',icon:'🏠',label:'Home'},{id:'orders',icon:'🚚',label:'Deliveries'},{id:'dues',icon:'💰',label:'Dues'}],
+};
+
+function buildNav(role) {
+  const nav = document.getElementById('bottom-nav');
+  nav.innerHTML = NAV_CONFIG[role].map(item => `
+    <button class="nav-btn ${item.id==='home'?'active':''}" id="nav-${item.id}" onclick="showScreen('${item.id}')">
+      <span class="nav-icon">${item.icon}</span>${item.label}
+    </button>`).join('');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const screen = document.getElementById('screen-'+id);
+  if(screen) screen.classList.add('active');
+  const navBtn = document.getElementById('nav-'+id);
+  if(navBtn) navBtn.classList.add('active');
+
+  // Screen-specific init
+  if(id==='home') renderDashboard();
+  if(id==='orders') renderOrdersList();
+  if(id==='customers') renderCustomerList();
+  if(id==='dues') renderDues();
+  if(id==='approvals') renderApprovals();
+  if(id==='new-order') initNewOrder();
+  if(id==='orders') document.getElementById('orders-screen-title').textContent =
+    STATE.role==='delivery' ? 'My Deliveries' : 'Orders';
+}
+
+// ── APP INIT ──────────────────────────────────────────────────────
+async function initApp() {
+  if(!window.dbReady) {
+    showToast('⚠ Firebase not configured — using demo data');
+    loadDemoData();
+  } else {
+    await loadCustomers();
+    subscribeOrders();
+  }
+  showScreen('home');
+
+  // Show upload section for owner only
+  const uploadSection = document.getElementById('owner-upload-section');
+  if(uploadSection) uploadSection.style.display = STATE.role==='owner' ? 'block' : 'none';
+  // Pre-set add customer button visibility
+  const addBtn = document.getElementById('add-cust-btn-wrap');
+  if(addBtn) addBtn.style.display = (STATE.role==='owner'||STATE.role==='sales') ? 'block' : 'none';
+}
+
+// ── DEMO DATA ─────────────────────────────────────────────────────
+function loadDemoData() {
+  STATE.customers = [
+    {id:'c1',name:'Sharma Dhaba',phone:'9876543210',address:'NH-48 near Khandala',area:'Khandala',
+     pricing:{lp:270,mfp:290,lfp:250,mp:340,ghee:620,lc:55,fc:50,ch:38,sl:90,ml:90,cmk:230,stk:225},balance:0},
+    {id:'c2',name:'Hotel Sai Palace',phone:'9765432109',address:'Pune-Satara Rd, Saswad',area:'Saswad',
+     pricing:{lp:280,mfp:300,lfp:260,mp:350,ghee:650,lc:60,fc:55,ch:40,sl:100,ml:100,cmk:240,stk:237},balance:2450},
+    {id:'c3',name:'Green Valley Resort',phone:'9654321098',address:'Lonavala Highway',area:'Lonavala',
+     pricing:{},balance:0},
+  ];
+  STATE.orders = [
+    {id:'ORD001',date:TODAY_KEY,customerId:'c1',customerName:'Sharma Dhaba',
+     status:'modified',createdBy:'sales',
+     items:[{product:'lp',name:'Lite Paneer',qty:10,rate:270,unit:'kg',amount:2700}],
+     originalItems:[{product:'lp',name:'Lite Paneer',qty:12,rate:270,unit:'kg',amount:3240}],
+     modifiedBy:'delivery',modNotes:'Customer wanted only 10kg today',
+     payment:{mode:'',amount:0,received:false},total:2700,notes:''},
+    {id:'ORD002',date:TODAY_KEY,customerId:'c2',customerName:'Hotel Sai Palace',
+     status:'due',createdBy:'sales',
+     items:[{product:'ghee',name:'Ghee',qty:2,rate:650,unit:'kg',amount:1300},{product:'mfp',name:'Med Fat Paneer',qty:5,rate:300,unit:'kg',amount:1500}],
+     originalItems:null,
+     payment:{mode:'',amount:0,received:false,dueDate:TODAY_KEY},total:2800,daysOverdue:3,notes:''},
+  ];
+  renderDashboard();
+  updateApprovalBadge();
+}
+
+// ── FIREBASE: CUSTOMERS ───────────────────────────────────────────
+async function loadCustomers() {
+  if(!window.dbReady) return;
+  const {getDocs,collection} = window.fsOps;
+  const snap = await getDocs(collection(window.db,'customers'));
+  STATE.customers = snap.docs.map(d => ({id:d.id,...d.data()}));
+}
+
+// ── FIREBASE: ORDERS SUBSCRIPTION ────────────────────────────────
+function subscribeOrders() {
+  if(!window.dbReady) return;
+  const {onSnapshot,collection,query,where,orderBy} = window.fsOps;
+  const q = query(collection(window.db,'orders'), where('date','==',TODAY_KEY), orderBy('createdAt','desc'));
+  STATE.ordersUnsubscribe = onSnapshot(q, snap => {
+    STATE.orders = snap.docs.map(d => ({id:d.id,...d.data()}));
+    renderDashboard();
+    updateApprovalBadge();
+    if(document.getElementById('screen-orders').classList.contains('active')) renderOrdersList();
+    if(document.getElementById('screen-approvals').classList.contains('active')) renderApprovals();
+  });
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function renderDashboard() {
+  const todayOrders = STATE.orders.filter(o => o.date === TODAY_KEY);
+  const totalRev = todayOrders.reduce((s,o) => s+(o.total||0), 0);
+  const pending  = todayOrders.filter(o => o.status==='confirmed'||o.status==='modified').length;
+
+  document.getElementById('stat-orders').textContent  = todayOrders.length;
+  document.getElementById('stat-revenue').textContent = '₹'+(totalRev/1000).toFixed(1)+'k';
+  document.getElementById('stat-pending').textContent = pending;
+
+  // Approval alert
+  const mods = todayOrders.filter(o => o.status==='modified');
+  const alertEl = document.getElementById('approval-alert');
+  if(mods.length > 0 && STATE.role !== 'delivery') {
+    alertEl.style.display = 'flex';
+    document.getElementById('approval-alert-text').textContent = `${mods.length} order${mods.length>1?'s':''} modified — tap to review`;
+  } else {
+    alertEl.style.display = 'none';
+  }
+
+  // Recent orders
+  const list = document.getElementById('home-orders-list');
+  if(!todayOrders.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>No orders today</p></div>';
+    return;
+  }
+  list.innerHTML = todayOrders.slice(0,5).map(o => orderCardHTML(o,true)).join('');
+}
+
+// ── ORDER CARD HTML ───────────────────────────────────────────────
+function orderCardHTML(o, compact=false) {
+  const statusLabel = {draft:'Draft',confirmed:'Confirmed',modified:'Modified ⚠',
+    delivered:'Delivered',paid:'Paid ✓',due:'Due 💰',partial:'Partial'};
+  const statusClass = {draft:'status-draft',confirmed:'status-confirmed',modified:'status-modified',
+    delivered:'status-delivered',paid:'status-paid',due:'status-due',partial:'status-partial'};
+  const days = o.daysOverdue ? `<span style="font-size:11px;color:var(--red);margin-left:6px;">${o.daysOverdue}d overdue</span>` : '';
+
+  return `<div class="order-card" id="ocard-${o.id}">
+    <div class="order-head" onclick="toggleOrder('${o.id}')">
+      <div>
+        <div class="order-id">#${o.id}</div>
+        <div class="order-customer">${o.customerName}</div>
+        ${days}
+      </div>
+      <div style="text-align:right;">
+        <div class="order-amount">₹${(o.total||0).toLocaleString('en-IN')}</div>
+        <span class="status-pill ${statusClass[o.status]||'status-draft'}">${statusLabel[o.status]||o.status}</span>
+      </div>
+    </div>
+    <div class="order-body" id="obody-${o.id}">
+      ${orderBodyHTML(o)}
+    </div>
+  </div>`;
+}
+
+function orderBodyHTML(o) {
+  const items = o.items || [];
+  const origItems = o.originalItems;
+  let html = '<div class="order-items">';
+
+  items.forEach(item => {
+    const orig = origItems ? origItems.find(x => x.product===item.product) : null;
+    const changed = orig && (orig.qty !== item.qty || orig.rate !== item.rate);
+    html += `<div class="order-item-row">
+      <div>
+        <div class="item-name">${item.name} ${changed?'<span style="color:var(--red);font-size:10px;">MODIFIED</span>':''}</div>
+        <div class="item-detail">${item.qty} ${item.unit} × ₹${item.rate}</div>
+        ${changed?`<div style="font-size:10px;color:var(--muted);text-decoration:line-through;">${orig.qty} ${item.unit} × ₹${orig.rate}</div>`:''}
+      </div>
+      <div class="item-amt">₹${(item.amount||0).toLocaleString('en-IN')}</div>
+    </div>`;
+  });
+  html += `</div>
+  <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1.5px solid var(--border);">
+    <span style="font-weight:700;">Total</span>
+    <span style="font-family:'DM Serif Display',serif;font-size:18px;color:var(--amber);">₹${(o.total||0).toLocaleString('en-IN')}</span>
+  </div>`;
+
+  if(o.modNotes) html += `<div style="background:#FFF8E1;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:12px;color:#795548;"><b>Mod note:</b> ${o.modNotes}</div>`;
+  if(o.notes) html += `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">📝 ${o.notes}</div>`;
+
+  // Payment info
+  if(o.payment && o.payment.received) {
+    html += `<div style="background:#E8F5E9;border-radius:8px;padding:8px 10px;font-size:12px;color:var(--green);">
+      ✓ Paid: ₹${o.payment.amount} via ${o.payment.mode}</div>`;
+  } else if(o.status==='due') {
+    html += `<div style="background:#FFEBEE;border-radius:8px;padding:8px 10px;font-size:12px;color:var(--red);">
+      💰 Payment due${o.daysOverdue?` — ${o.daysOverdue} days overdue`:''}</div>`;
+  }
+
+  // Action buttons
+  html += '<div class="btn-row" style="margin-top:10px;">';
+
+  if(STATE.role==='delivery' && (o.status==='confirmed'||o.status==='modified')) {
+    html += `<button class="btn btn-secondary btn-sm" onclick="openModifyOrder('${o.id}')">✏ Modify</button>
+             <button class="btn btn-success btn-sm" onclick="openPaymentModal('${o.id}')">💰 Payment</button>`;
+  }
+  if((STATE.role==='sales'||STATE.role==='owner') && o.status==='modified') {
+    html += `<button class="btn btn-danger btn-sm" onclick="rejectModification('${o.id}')">✕ Reject</button>
+             <button class="btn btn-success btn-sm" onclick="approveModification('${o.id}')">✓ Approve</button>`;
+  }
+  if((STATE.role==='sales'||STATE.role==='owner') && o.status==='delivered') {
+    html += `<button class="btn btn-primary btn-sm" onclick="finaliseOrder('${o.id}')">✓ Finalise</button>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function toggleOrder(id) {
+  const body = document.getElementById('obody-'+id);
+  if(body) body.classList.toggle('open');
+}
+
+// ── ORDER FILTERING ───────────────────────────────────────────────
+let currentFilter = 'all';
+function filterOrders(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOrdersList();
+}
+
+function renderOrdersList() {
+  let orders = [...STATE.orders];
+  if(STATE.role==='delivery') orders = orders.filter(o => o.status==='confirmed'||o.status==='modified'||o.status==='delivered');
+  if(currentFilter!=='all') orders = orders.filter(o => o.status===currentFilter);
+  orders.sort((a,b) => (b.createdAt||0)-(a.createdAt||0));
+
+  const list = document.getElementById('orders-list');
+  if(!orders.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders for this filter</p></div>';
+    return;
+  }
+  list.innerHTML = orders.map(o => orderCardHTML(o)).join('');
+}
+
+// ── APPROVALS ─────────────────────────────────────────────────────
+function renderApprovals() {
+  const mods = STATE.orders.filter(o => o.status==='modified');
+  const list = document.getElementById('approvals-list');
+  if(!mods.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>All clear — no pending approvals</p></div>';
+    return;
+  }
+  list.innerHTML = mods.map(o => orderCardHTML(o)).join('');
+  // Auto-expand modified orders
+  mods.forEach(o => { const b = document.getElementById('obody-'+o.id); if(b) b.classList.add('open'); });
+}
+
+function updateApprovalBadge() {
+  const mods = STATE.orders.filter(o => o.status==='modified').length;
+  STATE.pendingApprovals = mods;
+  const dot = document.getElementById('notif-dot');
+  if(dot) dot.classList.toggle('show', mods > 0 && STATE.role !== 'delivery');
+  document.getElementById('stat-pending').textContent = mods;
+}
+
+// ── NEW ORDER ─────────────────────────────────────────────────────
+function initNewOrder() {
+  STATE.selectedCustomer = null;
+  STATE.cart = {};
+  document.getElementById('step-customer').style.display = 'block';
+  document.getElementById('step-products').style.display = 'none';
+  document.getElementById('cust-search').value = '';
+  document.getElementById('cust-results').innerHTML = '';
+}
+
+function searchCustomers(q) {
+  const results = document.getElementById('cust-results');
+  if(!q.trim()) { results.innerHTML = ''; return; }
+  const matches = STATE.customers.filter(c =>
+    c.name.toLowerCase().includes(q.toLowerCase()) ||
+    (c.area||'').toLowerCase().includes(q.toLowerCase()));
+
+  if(!matches.length) {
+    results.innerHTML = '<div style="padding:12px;text-align:center;color:var(--muted);font-size:13px;">No customers found</div>';
+    return;
+  }
+  results.innerHTML = matches.map(c => `
+    <div class="customer-row" onclick="selectCustomer('${c.id}')">
+      <div>
+        <div class="cust-name">${c.name}</div>
+        <div class="cust-sub">📍 ${c.area||'—'} &nbsp;|&nbsp; 📞 ${c.phone||'—'}</div>
+      </div>
+      <span style="font-size:18px;">→</span>
+    </div>`).join('');
+}
+
+function selectCustomer(id) {
+  STATE.selectedCustomer = STATE.customers.find(c => c.id===id);
+  if(!STATE.selectedCustomer) return;
+  STATE.cart = {};
+  document.getElementById('step-customer').style.display = 'none';
+  document.getElementById('step-products').style.display = 'block';
+  document.getElementById('selected-cust-name').textContent = STATE.selectedCustomer.name;
+  document.getElementById('selected-cust-area').textContent = STATE.selectedCustomer.area||'';
+  renderProductList();
+}
+
+function clearCustomer() {
+  STATE.selectedCustomer = null;
+  STATE.cart = {};
+  document.getElementById('step-customer').style.display = 'block';
+  document.getElementById('step-products').style.display = 'none';
+  document.getElementById('cust-search').value = '';
+}
+
+function getRate(productId) {
+  const cust = STATE.selectedCustomer;
+  if(cust && cust.pricing && cust.pricing[productId]) return cust.pricing[productId];
+  const prod = PRODUCTS.find(p => p.id===productId);
+  return prod ? prod.stdRate : 0;
+}
+
+function renderProductList() {
+  const container = document.getElementById('product-list');
+  container.innerHTML = PRODUCTS.map(p => {
+    const rate = getRate(p.id);
+    const qty  = STATE.cart[p.id]?.qty || 0;
+    return `<div class="card" style="margin-bottom:10px;">
+      <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;">
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:600;">${p.emoji} ${p.name}</div>
+          <div style="font-size:12px;color:var(--muted);">₹${rate}/${p.unit}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="qty-btn" onclick="updateCart('${p.id}',-1)">−</button>
+          <span class="qty-display" id="qty-${p.id}" style="color:${qty>0?'var(--amber)':'var(--ink)'}">${qty}</span>
+          <button class="qty-btn" onclick="updateCart('${p.id}',1)">+</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateOrderSummary();
+}
+
+function updateCart(productId, delta) {
+  if(!STATE.cart[productId]) STATE.cart[productId] = {qty:0, rate:getRate(productId)};
+  STATE.cart[productId].qty = Math.max(0, (STATE.cart[productId].qty||0) + delta);
+  if(STATE.cart[productId].qty === 0) delete STATE.cart[productId];
+  const el = document.getElementById('qty-'+productId);
+  if(el) {
+    const qty = STATE.cart[productId]?.qty||0;
+    el.textContent = qty;
+    el.style.color = qty>0 ? 'var(--amber)' : 'var(--ink)';
+  }
+  updateOrderSummary();
+}
+
+function updateOrderSummary() {
+  const items = Object.entries(STATE.cart).map(([pid,v]) => {
+    const p = PRODUCTS.find(x=>x.id===pid);
+    return {product:pid,name:p.name,qty:v.qty,rate:v.rate,unit:p.unit,amount:v.qty*v.rate};
+  }).filter(x=>x.qty>0);
+
+  const total = items.reduce((s,i)=>s+i.amount,0);
+  document.getElementById('order-total').textContent = '₹'+total.toLocaleString('en-IN');
+
+  const sumEl = document.getElementById('order-summary-items');
+  if(!items.length) { sumEl.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px 0;">No items added yet</div>'; return; }
+  sumEl.innerHTML = items.map(i =>
+    `<div class="order-item-row">
+      <div><div class="item-name">${i.name}</div><div class="item-detail">${i.qty} ${i.unit} × ₹${i.rate}</div></div>
+      <div class="item-amt">₹${i.amount.toLocaleString('en-IN')}</div>
+    </div>`).join('');
+}
+
+async function submitOrder() {
+  const items = Object.entries(STATE.cart).map(([pid,v]) => {
+    const p = PRODUCTS.find(x=>x.id===pid);
+    return {product:pid,name:p.name,qty:v.qty,rate:v.rate,unit:p.unit,amount:v.qty*v.rate};
+  }).filter(x=>x.qty>0);
+
+  if(!items.length) { showToast('Add at least one product'); return; }
+  if(!STATE.selectedCustomer) { showToast('Select a customer first'); return; }
+
+  const total = items.reduce((s,i)=>s+i.amount,0);
+  const orderId = 'ORD'+Date.now().toString().slice(-6);
+  const order = {
+    id: orderId,
+    date: TODAY_KEY,
+    customerId: STATE.selectedCustomer.id,
+    customerName: STATE.selectedCustomer.name,
+    customerArea: STATE.selectedCustomer.area||'',
+    customerPhone: STATE.selectedCustomer.phone||'',
+    status: 'confirmed',
+    createdBy: 'sales',
+    items, total,
+    originalItems: null,
+    payment: {mode:'',amount:0,received:false},
+    notes: document.getElementById('order-notes').value||'',
+    createdAt: Date.now(),
+  };
+
+  if(window.dbReady) {
+    const {doc,setDoc,serverTimestamp} = window.fsOps;
+    order.createdAt = serverTimestamp();
+    await setDoc(doc(window.db,'orders',orderId), order);
+  } else {
+    STATE.orders.unshift(order);
+  }
+
+  showToast('✓ Order submitted — #'+orderId);
+  STATE.cart = {};
+  STATE.selectedCustomer = null;
+  renderDashboard();
+  showScreen('orders');
+}
+
+// ── MODIFY ORDER (DELIVERY PERSON) ────────────────────────────────
+function openModifyOrder(orderId) {
+  const order = STATE.orders.find(o => o.id===orderId);
+  if(!order) return;
+
+  const modal = document.getElementById('modal-order');
+  const content = document.getElementById('modal-order-content');
+  document.getElementById('modal-order-title').textContent = 'Modify Order #'+orderId;
+
+  content.innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Customer: <b>${order.customerName}</b></div>
+    <div class="section-label">Edit Quantities / Rates</div>
+    ${order.items.map((item,i) => `
+      <div class="card" style="margin-bottom:8px;">
+        <div class="card-body" style="padding:10px 14px;">
+          <div style="font-weight:600;margin-bottom:8px;">${item.name}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="field" style="margin-bottom:0;">
+              <label>Qty (${item.unit})</label>
+              <input type="number" id="mod-qty-${i}" value="${item.qty}" min="0" step="0.5" oninput="recalcModItem(${i})">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Rate (₹)</label>
+              <input type="number" id="mod-rate-${i}" value="${item.rate}" min="0" step="1" oninput="recalcModItem(${i})">
+            </div>
+          </div>
+          <div style="text-align:right;font-size:13px;font-weight:600;margin-top:6px;color:var(--amber);" id="mod-amt-${i}">
+            ₹${item.amount.toLocaleString('en-IN')}
+          </div>
+        </div>
+      </div>`).join('')}
+    <div class="field">
+      <label>Reason for modification</label>
+      <textarea id="mod-notes" placeholder="e.g. Customer reduced quantity, item not available..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-order')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveModification('${orderId}')">Submit Modification</button>
+    </div>`;
+
+  modal.classList.add('open');
+}
+
+function recalcModItem(i) {
+  const qty  = parseFloat(document.getElementById('mod-qty-'+i)?.value)||0;
+  const rate = parseFloat(document.getElementById('mod-rate-'+i)?.value)||0;
+  const el   = document.getElementById('mod-amt-'+i);
+  if(el) el.textContent = '₹'+(qty*rate).toLocaleString('en-IN');
+}
+
+async function saveModification(orderId) {
+  const order = STATE.orders.find(o => o.id===orderId);
+  if(!order) return;
+  const notes = document.getElementById('mod-notes').value.trim();
+  if(!notes) { showToast('Please enter a reason for modification'); return; }
+
+  const newItems = order.items.map((item,i) => {
+    const qty  = parseFloat(document.getElementById('mod-qty-'+i)?.value)||0;
+    const rate = parseFloat(document.getElementById('mod-rate-'+i)?.value)||0;
+    return {...item, qty, rate, amount:qty*rate};
+  });
+  const newTotal = newItems.reduce((s,i)=>s+i.amount,0);
+  const updates = {status:'modified', items:newItems, originalItems:order.originalItems||order.items,
+    modifiedBy:'delivery', modNotes:notes, total:newTotal, modifiedAt:Date.now()};
+
+  if(window.dbReady) {
+    const {doc,updateDoc} = window.fsOps;
+    await updateDoc(doc(window.db,'orders',orderId), updates);
+  } else {
+    Object.assign(order, updates);
+    renderDashboard(); renderOrdersList(); updateApprovalBadge();
+  }
+  closeModal('modal-order');
+  showToast('⚠ Modification sent for approval');
+}
+
+// ── APPROVE / REJECT MODIFICATION ────────────────────────────────
+async function approveModification(orderId) {
+  const updates = {status:'delivered', approvedBy:'sales', approvedAt:Date.now()};
+  await updateOrder(orderId, updates);
+  showToast('✓ Modification approved');
+  renderApprovals(); renderDashboard(); updateApprovalBadge();
+}
+
+async function rejectModification(orderId) {
+  const order = STATE.orders.find(o => o.id===orderId);
+  if(!order) return;
+  const updates = {status:'confirmed', items:order.originalItems||order.items,
+    total:(order.originalItems||order.items).reduce((s,i)=>s+(i.amount||0),0),
+    originalItems:null, modNotes:'', modifiedBy:''};
+  await updateOrder(orderId, updates);
+  showToast('Modification rejected — order restored');
+  renderApprovals(); renderDashboard(); updateApprovalBadge();
+}
+
+// ── PAYMENT MODAL ─────────────────────────────────────────────────
+function openPaymentModal(orderId) {
+  const order = STATE.orders.find(o => o.id===orderId);
+  if(!order) return;
+  let selectedMode = '';
+
+  const modal = document.getElementById('modal-order');
+  document.getElementById('modal-order-title').textContent = 'Collect Payment';
+  document.getElementById('modal-order-content').innerHTML = `
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:13px;color:var(--muted);">${order.customerName}</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:28px;color:var(--amber);">₹${order.total.toLocaleString('en-IN')}</div>
+    </div>
+    <div class="section-label">Payment Mode</div>
+    <div class="pay-modes">
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'cash')"><span class="pay-mode-icon">💵</span>Cash</div>
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'phonepay')"><span class="pay-mode-icon">📱</span>PhonePe</div>
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'paytm')"><span class="pay-mode-icon">💳</span>Paytm</div>
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'gpay')"><span class="pay-mode-icon">🔵</span>GPay</div>
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'cheque')"><span class="pay-mode-icon">📄</span>Cheque</div>
+      <div class="pay-mode-btn" onclick="selectPayMode(this,'due')"><span class="pay-mode-icon">⏰</span>Due</div>
+    </div>
+    <div id="cheque-field" style="display:none;" class="field">
+      <label>Cheque Number</label>
+      <input id="cheque-no" placeholder="Enter cheque number">
+    </div>
+    <div class="field">
+      <label>Amount Received (₹)</label>
+      <input type="number" id="pay-amount" value="${order.total}" step="1" min="0">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="closeModal('modal-order')">Cancel</button>
+      <button class="btn btn-success" onclick="savePayment('${orderId}')">Confirm Payment</button>
+    </div>`;
+  modal.classList.add('open');
+}
+
+function selectPayMode(btn, mode) {
+  document.querySelectorAll('.pay-mode-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  btn.dataset.mode = mode;
+  document.getElementById('cheque-field').style.display = mode==='cheque'?'block':'none';
+}
+
+async function savePayment(orderId) {
+  const selectedBtn = document.querySelector('.pay-mode-btn.selected');
+  if(!selectedBtn) { showToast('Select a payment mode'); return; }
+  const mode   = selectedBtn.dataset.mode;
+  const amount = parseFloat(document.getElementById('pay-amount').value)||0;
+  const chequeNo = document.getElementById('cheque-no')?.value||'';
+
+  const order   = STATE.orders.find(o => o.id===orderId);
+  const isDue   = mode==='due';
+  const isPart  = !isDue && amount < (order?.total||0);
+  const newStatus = isDue ? 'due' : isPart ? 'partial' : 'delivered';
+
+  const updates = {
+    status: newStatus,
+    payment: {mode, amount, received:!isDue, chequeNo, receivedAt:Date.now()},
+    dueDate: isDue ? TODAY_KEY : null,
+    daysOverdue: 0,
+  };
+  await updateOrder(orderId, updates);
+  closeModal('modal-order');
+  showToast(isDue ? '⏰ Marked as due' : isPart ? `💰 Partial payment ₹${amount} recorded` : `✓ Payment of ₹${amount} collected`);
+  renderDashboard(); renderOrdersList();
+}
+
+// ── FINALISE ORDER (SALES/OWNER) ──────────────────────────────────
+async function finaliseOrder(orderId) {
+  await updateOrder(orderId, {status:'paid', finalisedBy:STATE.role, finalisedAt:Date.now()});
+  showToast('✓ Order finalised');
+  renderDashboard(); renderOrdersList();
+}
+
+// ── UPDATE ORDER HELPER ───────────────────────────────────────────
+async function updateOrder(orderId, updates) {
+  if(window.dbReady) {
+    const {doc,updateDoc} = window.fsOps;
+    await updateDoc(doc(window.db,'orders',orderId), updates);
+  } else {
+    const order = STATE.orders.find(o => o.id===orderId);
+    if(order) Object.assign(order, updates);
+  }
+}
+
+// ── CUSTOMER LIST ─────────────────────────────────────────────────
+function renderCustomerList(q='') {
+  // Show Add Customer button for owner and sales (not delivery)
+  const addBtn = document.getElementById('add-cust-btn-wrap');
+  if(addBtn) addBtn.style.display = (STATE.role==='owner'||STATE.role==='sales') ? 'block' : 'none';
+  const container = document.getElementById('customer-list-container');
+  let custs = STATE.customers;
+  if(q) custs = custs.filter(c => c.name.toLowerCase().includes(q.toLowerCase())||
+    (c.area||'').toLowerCase().includes(q.toLowerCase()));
+  if(!custs.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No customers found</p></div>';
+    return;
+  }
+  container.innerHTML = custs.map(c => `
+    <div class="customer-row" onclick="openCustomerDetail('${c.id}')">
+      <div>
+        <div class="cust-name">${c.name}</div>
+        <div class="cust-sub">📍 ${c.area||'—'} &nbsp;|&nbsp; 📞 ${c.phone||'—'}</div>
+      </div>
+      <div>
+        <div class="cust-balance ${(c.balance||0)>0?'owed':'clear'}">
+          ${(c.balance||0)>0?'₹'+(c.balance).toLocaleString('en-IN')+' due':'✓ Clear'}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openCustomerDetail(id) {
+  const c = STATE.customers.find(x=>x.id===id);
+  if(!c) return;
+  const modal = document.getElementById('modal-order');
+  document.getElementById('modal-order-title').textContent = c.name;
+  const priceRows = PRODUCTS.map(p => {
+    const rate = c.pricing?.[p.id] || p.stdRate;
+    const isCustom = c.pricing?.[p.id] && c.pricing[p.id] !== p.stdRate;
+    return `<div class="order-item-row">
+      <div class="item-name">${p.emoji} ${p.name}</div>
+      <div style="font-size:13px;font-weight:${isCustom?'700':'400'};color:${isCustom?'var(--amber)':'var(--ink)'}">
+        ₹${rate}/${p.unit}${isCustom?' ★':''}
+      </div></div>`;
+  }).join('');
+  document.getElementById('modal-order-content').innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">📞 ${c.phone||'—'}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">📍 ${c.address||c.area||'—'}</div>
+    ${(c.balance||0)>0?`<div style="background:#FFEBEE;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:700;">💰 Outstanding: ₹${c.balance.toLocaleString('en-IN')}</div>`:''}
+    <div class="section-label">Pricing (★ = custom rate)</div>
+    ${priceRows}
+    ${STATE.role==='owner'?`<button class="btn btn-primary" style="margin-top:12px;" onclick="closeModal('modal-order')">Close</button>`:''}`;
+  modal.classList.add('open');
+}
+
+// ── DUES ──────────────────────────────────────────────────────────
+function renderDues() {
+  const dueOrders = STATE.orders.filter(o => o.status==='due'||o.status==='partial');
+  const totalDue  = dueOrders.reduce((s,o) => s+(o.total-(o.payment?.amount||0)),0);
+  const overdue   = dueOrders.filter(o => (o.daysOverdue||0) >= 7).length;
+
+  document.getElementById('due-count').textContent  = dueOrders.length;
+  document.getElementById('due-amount').textContent = '₹'+(totalDue/1000).toFixed(1)+'k';
+  document.getElementById('due-overdue').textContent = overdue;
+
+  const list = document.getElementById('dues-list');
+  if(!dueOrders.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>No outstanding dues!</p></div>';
+    return;
+  }
+
+  // Group by customer
+  const byCustomer = {};
+  dueOrders.forEach(o => {
+    if(!byCustomer[o.customerId]) byCustomer[o.customerId] = {name:o.customerName,orders:[]};
+    byCustomer[o.customerId].orders.push(o);
+  });
+
+  list.innerHTML = Object.values(byCustomer).map(cg => {
+    const custTotal = cg.orders.reduce((s,o)=>s+(o.total-(o.payment?.amount||0)),0);
+    const rows = cg.orders.map(o => {
+      const due = o.total-(o.payment?.amount||0);
+      const days = o.daysOverdue||0;
+      return `<div class="due-row">
+        <div>
+          <div style="font-size:12px;font-weight:600;">#${o.id} — ₹${due.toLocaleString('en-IN')}</div>
+          <div style="font-size:11px;color:var(--muted);">Ordered ${o.date}</div>
+        </div>
+        <span class="due-days ${days>=7?'overdue':'ok'}">${days===0?'Today':days+'d'}</span>
+      </div>`;
+    }).join('');
+    return `<div class="card"><div class="card-head">
+      <h3>${cg.name}</h3>
+      <span style="font-family:'DM Serif Display',serif;font-size:16px;color:var(--red);">₹${custTotal.toLocaleString('en-IN')}</span>
+    </div><div class="card-body" style="padding:0 16px;">${rows}</div></div>`;
+  }).join('');
+}
+
+// ── ADD CUSTOMER ──────────────────────────────────────────────────
+function showAddCustomer() {
+  const pricingFields = document.getElementById('nc-pricing-fields');
+  pricingFields.innerHTML = PRODUCTS.map(p => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:13px;width:130px;flex-shrink:0;">${p.emoji} ${p.name}</span>
+      <input type="number" id="ncp-${p.id}" placeholder="${p.stdRate}" step="1" min="0"
+        style="flex:1;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:13px;">
+      <span style="font-size:11px;color:var(--muted);">std ₹${p.stdRate}</span>
+    </div>`).join('');
+  document.getElementById('modal-add-customer').classList.add('open');
+}
+
+async function saveNewCustomer() {
+  const name = document.getElementById('nc-name').value.trim();
+  if(!name) { showToast('Enter customer name'); return; }
+  const pricing = {};
+  PRODUCTS.forEach(p => {
+    const v = parseFloat(document.getElementById('ncp-'+p.id)?.value);
+    if(!isNaN(v) && v>0) pricing[p.id] = v;
+  });
+  const customer = {
+    name,
+    phone: document.getElementById('nc-phone').value.trim(),
+    address: document.getElementById('nc-address').value.trim(),
+    area: document.getElementById('nc-area').value.trim(),
+    pricing, balance: 0,
+    createdAt: Date.now(),
+  };
+
+  if(window.dbReady) {
+    const {addDoc,collection} = window.fsOps;
+    const ref = await addDoc(collection(window.db,'customers'), customer);
+    customer.id = ref.id;
+  } else {
+    customer.id = 'c'+Date.now();
+  }
+  STATE.customers.push(customer);
+  closeModal('modal-add-customer');
+  showToast('✓ Customer added: '+name);
+  renderCustomerList();
+}
+
+// ── EXCEL UPLOAD ──────────────────────────────────────────────────
+async function uploadCustomers(input) {
+  const file = input.files[0];
+  if(!file) return;
+  showToast('⏳ Processing...');
+  try {
+    const { read, utils } = await import('https://cdn.sheetjs.com/xlsx-0.20.1/package/xlsx.mjs');
+    const ab = await file.arrayBuffer();
+    const wb = read(ab);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = utils.sheet_to_json(ws);
+    let added = 0;
+    for(const row of rows) {
+      const name = row['Name']||row['name']||'';
+      if(!name) continue;
+      const pricing = {};
+      PRODUCTS.forEach(p => {
+        const colKey = p.id+'_Rate';
+        const val = parseFloat(row[colKey]||row[colKey.toLowerCase()]||0);
+        if(val > 0) pricing[p.id] = val;
+      });
+      const customer = {
+        name: String(name),
+        phone: String(row['Phone']||row['phone']||''),
+        address: String(row['Address']||row['address']||''),
+        area: String(row['Area']||row['area']||''),
+        pricing, balance: 0, createdAt: Date.now(),
+      };
+      if(window.dbReady) {
+        const {addDoc,collection} = window.fsOps;
+        const ref = await addDoc(collection(window.db,'customers'), customer);
+        customer.id = ref.id;
+      } else {
+        customer.id = 'c'+Date.now()+added;
+      }
+      STATE.customers.push(customer);
+      added++;
+    }
+    showToast(`✓ ${added} customers uploaded`);
+    renderCustomerList();
+  } catch(e) {
+    showToast('Upload failed: '+e.message);
+  }
+}
+
+function downloadTemplate() {
+  const headers = ['Name','Phone','Address','Area',...PRODUCTS.map(p=>p.id+'_Rate')].join(',');
+  const example = ['Sharma Dhaba','9876543210','NH-48 Khandala','Khandala',...PRODUCTS.map(p=>p.stdRate)].join(',');
+  const csv = headers+'\n'+example;
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'GaavnFresh_Customers_Template.csv';
+  a.click();
+  showToast('Template downloaded');
+}
+
+// ── MODAL UTILS ───────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+// ── TOAST ──────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── FIREBASE CONFIG CHECK ─────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Show notice if running as local file (Firebase won't work locally)
+  if (window.location.protocol === 'file:') {
+    const notice = document.createElement('div');
+    notice.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#E65100;color:#fff;text-align:center;padding:8px 16px;font-size:12px;font-weight:600;z-index:9999;font-family:DM Sans,sans-serif;';
+    notice.textContent = '⚠ Running locally — Firebase needs tiiny.host to work. App is in demo mode.';
+    document.body.appendChild(notice);
+    // Push app content down
+    document.getElementById('app').style.paddingTop = '36px';
+  }
+  if(!window.dbReady) {
+    console.warn('Firebase not configured. Add your Firebase config to the firebaseConfig object.');
+  }
+  // Calculate days overdue for existing due orders periodically
+  setInterval(updateDaysOverdue, 60000);
+  updateDaysOverdue();
+});
+
+function updateDaysOverdue() {
+  const now = Date.now();
+  STATE.orders.forEach(o => {
+    if(o.status==='due' && o.dueDate) {
+      const due = new Date(o.dueDate+'T00:00:00');
+      o.daysOverdue = Math.floor((now - due.getTime()) / 86400000);
+    }
+  });
+}
+</script>
+
+</body>
+</html>
